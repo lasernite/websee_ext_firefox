@@ -20,7 +20,7 @@
 
 // On page change send new URL and Title
 chrome.webNavigation.onCompleted.addListener(function(details) {
-	sendDataIfUrlChange(details)
+	sendDataIfUrlChange(details);
 })
 
 chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
@@ -43,7 +43,7 @@ function sendDataIfUrlChange(details) {
 			});
 
 			var xhr = new XMLHttpRequest();
-			xhr.withCredentials = true;
+			// xhr.withCredentials = true;
 
 			// xhr.open("POST", "http://localhost:3000/visits/create.json");
 			xhr.open("POST", "https://websee.herokuapp.com/visits/create.json");
@@ -56,6 +56,39 @@ function sendDataIfUrlChange(details) {
 		// Update oldUrl with current url, for next call
 		window.oldUrl = tab.url
 	});
+}
+
+// Parsing HTML
+let { Cc, Ci } = require("chrome");
+/*
+ * Safely parse an HTML fragment, removing any executable
+ * JavaScript, and return a document fragment.
+ *
+ * @param {Document} doc The document in which to create the
+ *     returned DOM tree.
+ * @param {string} html The HTML fragment to parse.
+ * @param {boolean} allowStyle If true, allow <style> nodes and
+ *     style attributes in the parsed fragment. Gecko 14+ only.
+ * @param {nsIURI} baseURI The base URI relative to which resource
+ *     URLs should be processed. Note that this will not work for
+ *     XML fragments.
+ * @param {boolean} isXML If true, parse the fragment as XML.
+ */
+function parseHTML(doc, html, allowStyle, baseURI, isXML) {
+    let PARSER_UTILS = "@mozilla.org/parserutils;1";
+
+    // User the newer nsIParserUtils on versions that support it.
+    if (PARSER_UTILS in Cc) {
+        let parser = Cc[PARSER_UTILS]
+                               .getService(Ci.nsIParserUtils);
+        if ("parseFragment" in parser)
+            return parser.parseFragment(html, allowStyle ? parser.SanitizerAllowStyle : 0,
+                                        !!isXML, baseURI, doc.documentElement);
+    }
+
+    return Cc["@mozilla.org/feed-unescapehtml;1"]
+                     .getService(Ci.nsIScriptableUnescapeHTML)
+                     .parseFragment(html, !!isXML, baseURI, doc.documentElement);
 }
 
 

@@ -4,7 +4,13 @@
   "name": "Websee",
   "short_name": "Websee",
   "description": "This extension powers Websee, the most popular daily links and discussions across the web, from anonymous extension users like you!",
-  "version": "0.5",
+  "version": "0.5.2",
+
+  "applications": {
+    "gecko": {
+      "strict_min_version": "48.0"
+    }
+  },
 
   "permissions": [
     "activeTab",
